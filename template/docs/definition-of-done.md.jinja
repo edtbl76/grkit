@@ -1,0 +1,23 @@
+# Definition of done — {{ project_name }}
+
+A change is done when it passes all nine pillars. A pillar that does not apply says so in one line, with the
+reason; an unasked question and a genuinely empty answer must not look the same.
+
+| # | Pillar | Done when |
+|---|---|---|
+| 1 | **Documented** | The architecture entry explains the choice and the alternatives rejected; the runbook has the real commands; API and host lists are current. |
+| 2 | **Placed** | The architecture model shows it; a non-obvious flow has a sequence diagram. |
+| 3 | **Demonstrated** | A demo was actually run, end to end, including a negative case; a UI has eyes-on steps. A demo written but not run is not done. |
+| 4 | **Reversible** | Anything a demo creates has a teardown, or the demo says it is read-only. |
+| 5 | **Tracked** | The backlog and the issue tracker agree. |
+| 6 | **Operationally durable** | It runs on a schedule or trigger, is monitored (freshness and failure), and its secrets are restorable. Say whether a check runs by hand, in CI or on a timer, and why. |
+| 7 | **Scanned** | Security and quality scans ran on the change; every new high or critical is fixed or accepted with a written reason. |
+| 8 | **Cascaded** | Everything that had to move because this moved, did: callers, docs, diagrams, inventories. |
+| 9 | **Recoverable** | Every piece of state has a backup and a restore that was actually tested, with the date recorded. |
+
+## For a tool that deploys nothing
+
+A repo guard or local script has no deployment, so pillars 2, 6 and 9 shrink: its runbook section is the home,
+the CLI walkthrough is the whole demo (and must show the guard failing, with its exit code), and DR is "no state"
+unless it writes some. Exit codes are part of the contract: `1` the estate has a defect, `2` the check could not
+run.

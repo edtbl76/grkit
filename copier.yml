@@ -1,0 +1,21 @@
+# grkit — Copier template for the build-time half (docs/adopting.md).
+#   copier copy gh:edtbl76/grkit <repo>      then later:   copier update
+_subdirectory: template
+_templates_suffix: .jinja
+_answers_file: .copier-answers.yml
+
+project_name:
+  type: str
+  help: The project's name, as people say it
+  validator: "{% if not project_name.strip() %}required{% endif %}"
+
+project_summary:
+  type: str
+  help: One sentence — what this project is and who it serves
+  default: ""
+
+primary_language:
+  type: str
+  help: The main language (decides which test harness the rules name first)
+  choices: [python, typescript, go, java, rust, other]
+  default: python

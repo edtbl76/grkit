@@ -1,0 +1,3 @@
+# Documents this repo must carry — checked by scripts/check-required-docs.sh (one path per line, from the repo root).
+AGENTS.md
+docs/definition-of-done.md

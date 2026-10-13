@@ -1,0 +1,46 @@
+# {{ project_name }} — instructions for every coding agent
+{% if project_summary %}
+{{ project_summary }}
+{% endif %}
+This file is harness-neutral: every coding agent reads it. The core below comes from
+[grkit](https://github.com/edtbl76/grkit) and is refreshed by `copier update`; put this project's own rules under
+**Project rules** at the end.
+
+## Core rules (grkit)
+
+### Fail closed on the change path
+- **An absent, empty or errored result is never success.** A check that could not run exits `2`, never `0`.
+  `cmd 2>/dev/null` inside a boolean, a pipeline's last-command status and an empty list where findings were
+  expected each turn an error into a pass.
+- **Read what a tool printed, not only its exit code.** Some tools print `FAILED` and exit 0.
+- **A check nobody has watched fail is not a check.** Every guard has a test that makes it fail, asserting the
+  REASON, not only a non-zero status (exit 127 is non-zero too).
+
+### Fail open on the answer path, and never silently
+- A runtime guard outage degrades to "not guarded", never "no answer", and every fail-open is counted and alerted
+  on. Guards ship in SHADOW; promote to blocking only on a measured false-positive rate.
+
+### How work is done
+- **Test first** for every layer that makes decisions{% if primary_language == "python" %} (pytest){% elif primary_language == "typescript" %} (vitest or jest){% elif primary_language == "go" %} (go test){% elif primary_language == "java" %} (JUnit){% elif primary_language == "rust" %} (cargo test){% endif %}; shell that branches gets bats tests.
+- **Observe the real system before stubbing it.** Call the real API once and write the stub to what it returned.
+- **Prove a change in its own toolchain image before pushing**: CI confirms, it does not discover.
+- **Run the whole local guard suite before handoff**, not one guard: the first failure masks the later ones.
+- **Run static analysis with the CI gate's rules on the changed files before handoff**, and judge by its findings.
+- **Done means the definition of done**: [docs/definition-of-done.md](docs/definition-of-done.md).
+
+### Safety
+- **Secrets never pass through chat, logs or output.** Read them from the environment or a gitignored file; never
+  print one; never ask a person to paste one.
+- **Ask before a non-trivial change**: propose, get a yes, then build. One question at a time, with a
+  recommendation.
+- **Check decisions already made** before proposing anything.
+
+## Guards in this repo
+
+| Guard | Checks | Run |
+|---|---|---|
+| `scripts/check-required-docs.sh` | every document in `.grkit/required-docs` exists and has content | `bash scripts/check-required-docs.sh` |
+
+## Project rules
+
+<!-- Rules specific to {{ project_name }} go below this line; `copier update` leaves them alone. -->
