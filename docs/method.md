@@ -11,6 +11,10 @@ Guardrails sit in two places, and they fail in opposite directions on purpose.
 | **Promotion** | ship in SHADOW (record only); measure the false-positive rate on real traffic; then FLAG, then BLOCK | a new check blocks from day one, but only after it has been seen failing |
 | **Exit / decision** | `allow` or `block` (+ a recorded verdict) | `0` clean · `1` findings · `2` could not check |
 
+One exception sits on the answer path: **authority** checks ("may this caller run this action?") fail closed even
+at runtime. A content guard that is down means the answer goes out unscanned, which is a risk you can measure and
+alert on. An authorization check that is down must not mean "anyone may act". No trusted identity, no action.
+
 The two rules look contradictory and are the same idea: **never let an absence pose as a result.** On the answer
 path, the absence is a guard that did not answer; the safe reading is "unguarded", which keeps serving, and it is
 counted so someone sees it. On the change path, the absence is a check that did not run; the safe reading is "not

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "grkit"
-version = "0.1.1"
+version = "0.2.0"
 description = "Guardrails kit: fail-open runtime LLM guard contracts + fail-closed build-time checks"
 readme = "README.md"   # inside python/: setuptools refuses files outside the package dir
 requires-python = ">=3.10"

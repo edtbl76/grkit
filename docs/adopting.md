@@ -5,7 +5,7 @@
 Stdlib only, Python 3.10+. Install from git (the package lives in `python/`):
 
 ```
-pip install "grkit @ git+https://github.com/edtbl76/grkit@v0.1.1#subdirectory=python"
+pip install "grkit @ git+https://github.com/edtbl76/grkit@v0.2.0#subdirectory=python"
 ```
 
 A guard SERVICE uses `grkit.verdict`, `grkit.modes.ModeTable` and `grkit.pipeline.GuardrailPipeline` around its own
@@ -22,7 +22,9 @@ if blocked:
     return refusal(blocked.reason)
 ```
 
-Export `on_failure` as a metric and alert on it: fail-open is only safe when someone sees it happen.
+Export `on_failure` as a metric and alert on it: fail-open is only safe when someone sees it happen. On the act hook
+the client fails closed by default (an unreachable guard refuses the action); set `fail_closed_hooks` if a layer
+needs something else.
 
 ## The build-time half: the Copier template
 

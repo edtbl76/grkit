@@ -65,34 +65,63 @@ flowchart LR
 
 - **Serving a user?** A guard that's down must not take your product down with it. Treat it as "not guarded" and
   keep answering, but **count every time that happens**, so a guard that quietly stopped guarding still pages
-  somebody.
+  somebody. (One exception: checks on *authority*, like "may this caller run this action?", fail closed even here.
+  No trusted identity, no action.)
 - **Shipping a change?** A check that couldn't run must never look like a pass. "I verified nothing" and "I
   verified, and it's fine" are different answers, and your CI should treat them differently.
 
 Both rules are the same rule: **never let an absence pose as a result.** The long version is
 [docs/method.md](docs/method.md).
 
-## The runtime half: guarding the model
+## The runtime half: the guardrails platform
 
-No single guardrail catches everything. A prompt-injection scanner has no idea whether an answer stayed on topic,
-and a topic filter has no idea whether a JSON blob matches its schema. So you stack a few, each doing one job:
+No single guardrail catches everything. A prompt-injection scanner has no idea whether an answer stayed on topic, a
+topic filter has no idea whether a JSON blob matches its schema, and neither one classifies content safety the way
+a model trained for it does. So grkit's runtime half is built around **four paths, each doing one job**, composed as
+defense in depth:
+
+| # | Path | Reference tool | The one job it does | Where it sits |
+|---|---|---|---|---|
+| ① | **Scan** | Prompt Guard · Presidio · an NLI model | fast input/output checks: injection, PII, grounding, action policy | always on, at the agent's edge and the tool gateway |
+| ② | **Classify** | Llama Guard | content safety, by category | a second opinion Scan calls: small model on CPU, bigger one on GPU when it matters |
+| ③ | **Dialog** | NeMo Guardrails | keep a conversation on topic, resist jailbreaks | only the chat surface |
+| ④ | **Structure** | Guardrails AI | validate structured output, re-ask the model to fix it | only producers of structured output |
 
 ```mermaid
 flowchart LR
-  req["agent / RAG request"] --> scan["Scan<br/>injection · PII · grounding · action policy"]
-  scan --> classify["Classify<br/>content safety, by category"]
-  chat["chat surface"] --> dialog["Dialog<br/>stay on topic, resist jailbreaks"]
-  prod["structured output"] --> structure["Structure<br/>schema check + re-ask"]
+  req["agent / RAG<br/>request"] --> scan["① Scan<br/>always-on I/O"]
+  scan --> classify["② Classify<br/>content safety"]
+  chat["chat surface"] --> dialog["③ Dialog<br/>topical + input rails"]
+  prod["structured producer"] --> structure["④ Structure<br/>schema + re-ask"]
+  act["agent action"] --> authz["pre-action authorization<br/>allowlist · rate limit · confirm"]
+
+  classDef scan fill:#5fa37e22,stroke:#5fa37e;
+  classDef cls fill:#5f93c422,stroke:#5f93c4;
+  classDef dlg fill:#cf7a9222,stroke:#cf7a92;
+  classDef str fill:#d9a44122,stroke:#d9a441;
+  classDef auth fill:#9b2c2c22,stroke:#9b2c2c;
+  class scan scan
+  class classify cls
+  class dialog dlg
+  class structure str
+  class authz auth
 ```
 
-The services behind those boxes are yours to pick: Prompt Guard, Presidio, Llama Guard, NeMo Guardrails,
-Guardrails AI, or anything else. grkit gives them one shared contract, and gives your code a client that follows
-the two rules that make guards safe to deploy:
+Each guard runs only where it earns its keep, not every layer on every request. Two lanes complete the picture:
+**pre-action authorization**, which decides who may do what and *fails closed* (no trusted identity, no action),
+and **offline evaluation**, an LLM-judge lane that grades faithfulness away from live traffic.
+
+The tools are the ones this kit was built and measured against, not requirements. Swap any of them, but keep the
+jobs separate: each covers a failure the others can't see. Why four and not one, and the honest engineering notes
+(why the heavy ones end up as separate services, why the plain primitive beat the clever one), are in
+[docs/runtime-guardrails.md](docs/runtime-guardrails.md).
+
+What the Python package gives you is the **contract between them and your code**, built on two rules:
 
 - **New guards start in shadow mode.** They score everything and record it, but block nothing. You promote a
   guard to blocking only after you've measured how often it's wrong on your real traffic.
-- **Callers fail open, loudly.** Timeouts, refused connections, HTTP errors and garbage replies all become "allow",
-  and every one of them is counted by cause.
+- **Callers fail open on content, closed on authority, and loudly either way.** If the guard is unreachable, a
+  prompt or an answer goes through unscanned, but an *action* is refused. Every failure is counted by cause.
 
 ```python
 from grkit.client import GuardClient
@@ -135,7 +164,7 @@ More in [docs/change-gate.md](docs/change-gate.md).
 
 ```
 # the runtime library (stdlib only, Python 3.10+)
-pip install "grkit @ git+https://github.com/edtbl76/grkit@v0.1.1#subdirectory=python"
+pip install "grkit @ git+https://github.com/edtbl76/grkit@v0.2.0#subdirectory=python"
 
 # the project template
 pipx run copier copy gh:edtbl76/grkit path/to/your/repo

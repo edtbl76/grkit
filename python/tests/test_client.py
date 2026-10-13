@@ -59,6 +59,30 @@ def test_an_outage_fails_open_and_is_counted_by_cause(monkeypatch, raises, cause
     assert c.failures == {cause: 1}                                   # …but it is never silent
 
 
+def test_an_outage_on_the_act_hook_fails_closed_by_default(monkeypatch):
+    # Authority, not content: a guard that is down must not mean "anyone may act". The client this was extracted from
+    # failed open on every hook, so a guard outage let every action through (found writing docs/method.md, 2026-10-13).
+    c = _client(monkeypatch, raises=urllib.error.URLError(ConnectionRefusedError("refused")))
+    v = c.guard(Hook.ACT, "r", {"tool": "restart"})
+    assert v is not None and v.decision is Decision.BLOCK and v.validator == "guard-unavailable"
+    assert v.reason == "guard unavailable (connection): action refused"
+    assert c.failures == {"connection": 1}                            # counted like any other failure
+
+
+def test_a_bad_answer_on_the_act_hook_also_fails_closed(monkeypatch):
+    c = _client(monkeypatch, {"decision": "maybe"})
+    v = c.guard(Hook.ACT, "r", {"tool": "restart"})
+    assert v is not None and v.decision is Decision.BLOCK and "bad_response" in v.reason
+
+
+def test_which_hooks_fail_closed_is_a_choice(monkeypatch):
+    c = _client(monkeypatch, raises=socket.timeout("t"))
+    c.fail_closed_hooks = frozenset()                                 # e.g. a read-only tool layer with its own authz
+    assert c.guard(Hook.ACT, "r", {"tool": "read"}) is None
+    c.fail_closed_hooks = frozenset({Hook.OUTPUT})
+    assert c.guard(Hook.OUTPUT, "r", {"answer": "a", "sources": []}).decision is Decision.BLOCK
+
+
 def test_a_non_json_answer_fails_open_and_is_counted(monkeypatch):
     c = _client(monkeypatch, answer=b"<html>gateway error</html>")
     assert c.guard(Hook.OUTPUT, "r", {"answer": "a", "sources": []}) is None
