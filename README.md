@@ -22,7 +22,7 @@ Both rules say one thing: **never let an absence pose as a result.** The reasoni
 Runtime half:
 
 ```
-pip install "grkit @ git+https://github.com/edtbl76/grkit@v0.1.0#subdirectory=python"
+pip install "grkit @ git+https://github.com/edtbl76/grkit@v0.1.1#subdirectory=python"
 ```
 
 Build-time half:

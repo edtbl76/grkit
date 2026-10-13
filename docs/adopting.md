@@ -5,7 +5,7 @@
 Stdlib only, Python 3.10+. Install from git (the package lives in `python/`):
 
 ```
-pip install "grkit @ git+https://github.com/edtbl76/grkit@v0.1.0#subdirectory=python"
+pip install "grkit @ git+https://github.com/edtbl76/grkit@v0.1.1#subdirectory=python"
 ```
 
 A guard SERVICE uses `grkit.verdict`, `grkit.modes.ModeTable` and `grkit.pipeline.GuardrailPipeline` around its own
