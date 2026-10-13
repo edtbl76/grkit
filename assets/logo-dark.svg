@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 220" role="img" aria-labelledby="t d">
+  <title id="t">grkit</title>
+  <desc id="d">A snarling dog beside the word GRrrrKIT, over a road guardrail.</desc>
+  <!-- palette: light ink for dark backgrounds; amber = hazard; steel = rail posts -->
+  <g id="dog" transform="translate(16,26)">
+    <!-- ear -->
+    <path d="M58 40 L74 4 L94 44 Z" fill="#e6edf3" stroke="#e6edf3" stroke-width="2" stroke-linejoin="round"/>
+    <!-- skull + upper jaw -->
+    <path d="M28 92 C26 54 54 32 92 34 C118 36 134 48 142 64 L182 74 C192 77 196 86 192 96 L136 100 L128 104 C110 114 88 114 72 108 Z" fill="#e6edf3" stroke="#e6edf3" stroke-width="2" stroke-linejoin="round"/>
+    <!-- lower jaw + neck -->
+    <path d="M70 102 C88 118 110 122 130 122 L178 126 C184 134 178 142 164 144 L118 148 C96 160 62 164 40 150 C30 140 26 118 28 92 Z" fill="#e6edf3" stroke="#e6edf3" stroke-width="2" stroke-linejoin="round"/>
+    <!-- mouth -->
+    <path d="M128 102 L192 96 L180 126 L130 122 Z" fill="#9b2c2c"/>
+    <!-- teeth: upper row down, lower row up -->
+    <path d="M136 101 L142 114 L148 100 L154 113 L160 99 L166 112 L172 98 L178 111 L184 97 Z" fill="#ffffff"/>
+    <path d="M138 122 L144 112 L150 123 L156 113 L162 124 L168 114 L174 125 Z" fill="#ffffff"/>
+    <!-- angry eye + brow -->
+    <circle cx="104" cy="62" r="6.5" fill="#f2a900"/>
+    <path d="M88 48 L118 58" stroke="#f2a900" stroke-width="5" stroke-linecap="round"/>
+    <!-- nose -->
+    <circle cx="190" cy="80" r="6" fill="#e6edf3"/>
+  </g>
+  <!-- wordmark: GR, the growl trailing off, KIT -->
+  <g font-family="'Arial Black','Helvetica Neue',Arial,'DejaVu Sans',sans-serif" font-weight="900">
+    <text x="236" y="128" font-size="104" fill="#e6edf3" letter-spacing="-2">GR</text>
+    <text x="398" y="96" font-size="48" fill="#f2a900" font-style="italic">r</text>
+    <text x="426" y="84" font-size="38" fill="#f2a900" font-style="italic" opacity="0.8">r</text>
+    <text x="449" y="74" font-size="29" fill="#f2a900" font-style="italic" opacity="0.6">r</text>
+    <text x="470" y="128" font-size="104" fill="#e6edf3" letter-spacing="-2">KIT</text>
+  </g>
+  <!-- guardrail: W-beam on posts -->
+  <g>
+    <rect x="252" y="184" width="10" height="30" fill="#8a94a6"/>
+    <rect x="372" y="184" width="10" height="30" fill="#8a94a6"/>
+    <rect x="492" y="184" width="10" height="30" fill="#8a94a6"/>
+    <rect x="612" y="184" width="10" height="30" fill="#8a94a6"/>
+    <rect x="732" y="184" width="10" height="30" fill="#8a94a6"/>
+    <rect x="236" y="160" width="514" height="26" rx="6" fill="#f2a900"/>
+    <rect x="236" y="171" width="514" height="4" fill="#0d1117" opacity="0.35"/>
+    <circle cx="257" cy="173" r="3.5" fill="#0d1117"/>
+    <circle cx="377" cy="173" r="3.5" fill="#0d1117"/>
+    <circle cx="497" cy="173" r="3.5" fill="#0d1117"/>
+    <circle cx="617" cy="173" r="3.5" fill="#0d1117"/>
+    <circle cx="737" cy="173" r="3.5" fill="#0d1117"/>
+  </g>
+</svg>

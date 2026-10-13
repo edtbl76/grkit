@@ -1,0 +1,18 @@
+name: War story / new rule
+description: A guardrail that lied, a check that passed on nothing, a lesson the kit should carry.
+labels: [lesson]
+body:
+  - type: textarea
+    id: story
+    attributes:
+      label: What went wrong
+      description: What looked fine but wasn't? How did you find out?
+    validations:
+      required: true
+  - type: textarea
+    id: rule
+    attributes:
+      label: The rule you'd add
+      description: What would have caught it? A doc rule, a template change, a check, a client behaviour?
+    validations:
+      required: true

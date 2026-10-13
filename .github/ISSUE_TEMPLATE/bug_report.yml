@@ -1,0 +1,29 @@
+name: Bug report
+description: Something in the package or the template doesn't work as documented.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What did you run, what did you expect, and what happened instead? Paste the exact output.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: The smallest steps or code that show it.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: grkit version
+      description: The tag you installed or rendered from (e.g. v0.1.1).
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Python version and OS

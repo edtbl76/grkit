@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      # Everything runs in Docker as the runner's user: the same command a contributor runs locally.
+      - run: bash scripts/test.sh
+      - name: shellcheck
+        run: docker run --rm -v "$PWD":/mnt:ro koalaman/shellcheck:stable --severity=warning /mnt/scripts/test.sh /mnt/template/scripts/check-required-docs.sh
