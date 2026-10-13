@@ -27,10 +27,12 @@ grkit is a small kit for people who put LLMs into real software. It does two job
 It has no dependencies, ships no models, and runs no servers. It's the rules, the contracts, and a little code that
 makes the rules easy to follow.
 
-## Why it exists
+## A pattern running on dozens of production systems
 
-grkit was pulled out of [weyland](https://github.com/edtbl76/weyland-lab), a self-hosted AI platform run by one
-person and a lot of coding agents. Over a few months, the same kind of bug kept showing up in different places:
+grkit isn't a thought experiment. Its rules are in production on several dozen systems, and this repo packages them
+so the next system starts with them instead of learning them the hard way. The open-source reference implementation
+is [weyland](https://github.com/edtbl76/weyland-lab), an AI platform run by one person and a lot of coding agents.
+Across all of them, the same kind of bug kept showing up in different places:
 
 - A PII detector flagged the word **"Traefik"** as a person's name, with 100% confidence.
 - A code-quality gate reported **"passed"** on a brand-new project with a critical issue wide open.
@@ -186,7 +188,7 @@ Step by step, with what each piece is for: [docs/adopting.md](docs/adopting.md).
 - **Not a guard service.** grkit doesn't scan anything itself; it's the contract and the client. Run whatever
   guard models suit you.
 - **Not a framework.** Five small modules and a template. Read them in an afternoon.
-- **Not finished.** It's version 0.1. The rules come from one platform's mistakes; your mistakes are welcome too.
+- **Not finished.** It's version 0.2. The rules come from real production mistakes; yours are welcome too.
 
 ## Contributing
 
