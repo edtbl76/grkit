@@ -12,12 +12,16 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SCRATCH="$ROOT/.tmp"
 rm -rf "$SCRATCH" && mkdir -p "$SCRATCH"
+# JUnit reports for Trunk Flaky Tests (the CI uploads reports/junit/<variant>/*.xml). Cleared first so a stale report
+# from an earlier run is never uploaded as this one's.
+REPORTS="$ROOT/reports/junit"
+rm -rf "$REPORTS" && mkdir -p "$REPORTS/pytest" "$REPORTS/bats"
 trap 'rm -rf "$SCRATCH"' EXIT
 USER_FLAGS=(--user "$(id -u):$(id -g)" -e HOME=/tmp -e PIP_USER=1 -e PYTHONUSERBASE=/tmp/pu -e PATH=/tmp/pu/bin:/usr/local/bin:/usr/bin:/bin)
 
 echo "== 1/4 package tests"
 docker run --rm "${USER_FLAGS[@]}" -v "$ROOT":/w -w /w/python python:3.12-slim \
-  sh -c 'pip install -q --no-cache-dir pytest >/dev/null 2>&1 && python -m pytest -q -p no:cacheprovider'
+  sh -c 'pip install -q --no-cache-dir pytest >/dev/null 2>&1 && python -m pytest -q -p no:cacheprovider --junitxml=/w/reports/junit/pytest/pytest.xml'
 docker run --rm "${USER_FLAGS[@]}" -v "$ROOT":/src:ro python:3.12-slim sh -c 'cp -r /src /tmp/repo && rm -rf /tmp/repo/.git /tmp/repo/.tmp && \
   pip install -q --no-cache-dir /tmp/repo/python >/dev/null 2>&1 && cd / && python -c "import grkit, grkit.client, grkit.modes, \
   grkit.pipeline, grkit.checks; print(\"installed grkit\", grkit.__version__)"'
@@ -36,7 +40,8 @@ grep -q '^# Demo Project — instructions for every coding agent' "$SCRATCH/demo
 if grep -rn '{{\|{%' "$SCRATCH/demo" --include='*.md' >/dev/null; then echo "unrendered Jinja left in the output" >&2; exit 1; fi
 
 echo "== 3/4 the rendered guard's tests"
-docker run --rm "${USER_FLAGS[@]}" -v "$SCRATCH/demo":/w:ro -w /w bats/bats:latest scripts/tests/check-required-docs.bats
+docker run --rm "${USER_FLAGS[@]}" -v "$SCRATCH/demo":/w:ro -v "$REPORTS/bats":/r -w /w bats/bats:latest \
+  --report-formatter junit --output /r scripts/tests/check-required-docs.bats
 
 echo "== 4/4 the rendered guard on the rendered repo"
 docker run --rm "${USER_FLAGS[@]}" --entrypoint bash -v "$SCRATCH/demo":/w:ro -w /w bats/bats:latest \
