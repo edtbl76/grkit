@@ -8,7 +8,6 @@
 <h3 align="center">Grrrr, don't forget the guardrails!</h3>
 
 <p align="center">
-  <a href="https://github.com/edtbl76/grkit/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/edtbl76/grkit/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-f2a900"></a>
   <img alt="Python 3.10+, no dependencies" src="https://img.shields.io/badge/python-3.10%2B%20%C2%B7%20no%20deps-1d2433">
 </p>

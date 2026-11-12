@@ -1,0 +1,49 @@
+# grkit CI on the maintainer's Woodpecker (weyland B245; replaces the GitHub Actions workflow). Runs the whole suite
+# (scripts/test.sh: pytest, a real install, the rendered template, its bats) plus shellcheck, and sends the JUnit
+# results to Trunk Flaky Tests, pass or fail. Woodpecker can't receive GitHub webhooks on that LAN, so runs are started
+# manually; pull requests get no automatic check (run scripts/test.sh locally — it is the same command).
+
+# LOCAL backend: scripts/test.sh runs every stage in Docker, which the cluster agents don't have.
+labels:
+  backend: local
+
+when:
+  - event: [manual, push]
+    branch: main
+
+steps:
+  - name: test
+    image: /bin/bash
+    commands:
+      - bash scripts/test.sh
+
+  - name: shellcheck
+    image: /bin/bash
+    commands:
+      - docker run --rm -v "$PWD":/mnt:ro koalaman/shellcheck:stable --severity=warning /mnt/scripts/test.sh /mnt/template/scripts/check-required-docs.sh
+
+  # The uploader is the maintainer's shared fail-closed script at a pinned commit, checked against its sha256, running
+  # the pinned trunk-analytics-cli. It goes red if Trunk did not confirm the upload. Runs after a red test step too.
+  # Downloads go under the workspace, not /tmp: several local agents share one host.
+  - name: trunk-upload
+    image: /bin/bash
+    depends_on: [test]
+    when:
+      - status: [success, failure]
+    environment:
+      TRUNK_API_TOKEN:
+        from_secret: trunk_org_token
+      TRUNK_COLLECTION_ID: 8jol5WOk
+      TRUNK_REPO_URL: https://github.com/edtbl76/grkit
+      TRUNK_CLI_VERSION: 0.16.1
+      TRUNK_CLI_SHA256: 8c34f99a41d4b3151f711aca05d01478b2f707dd698d3980d2524646021af5f2
+      UPLOADER_COMMIT: 45c0b1caaf8b53a4647a0fb18dade66b5cdaaf2b
+      UPLOADER_SHA256: 09f3887d98e403800cc7a249eb2979b18405dd096a9d823cb8b066d8f8e6dd55
+    commands:
+      - mkdir -p .trunk-ci
+      - curl -sSfL --retry 5 --retry-all-errors --retry-delay 3 -o .trunk-ci/cli.tgz "https://github.com/trunk-io/analytics-cli/releases/download/$TRUNK_CLI_VERSION/trunk-analytics-cli-x86_64-unknown-linux.tar.gz"
+      - echo "$TRUNK_CLI_SHA256  .trunk-ci/cli.tgz" | sha256sum -c -
+      - tar -xzf .trunk-ci/cli.tgz -C .trunk-ci trunk-analytics-cli
+      - curl -sSfL --retry 5 --retry-all-errors --retry-delay 3 -o .trunk-ci/trunk-upload.sh "https://raw.githubusercontent.com/edtbl76/weyland-lab/$UPLOADER_COMMIT/scripts/ci/trunk-upload.sh"
+      - echo "$UPLOADER_SHA256  .trunk-ci/trunk-upload.sh" | sha256sum -c -
+      - TRUNK_CLI="$PWD/.trunk-ci/trunk-analytics-cli" bash .trunk-ci/trunk-upload.sh reports/junit
